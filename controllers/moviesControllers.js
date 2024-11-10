@@ -65,14 +65,18 @@ exports.GetAllMovies = async (req, res) => {
     let query = Movie.find();
 
     // ------sorting by price only-----
+    //url: localhost:8080/api/movie/?sort=price
     // if (req.query.sort) {
     //   query = query.sort(req.query.sort);
     // }
     //------sorting by releaseYear and ratings------
-    if (req.query.sort) {
+    //url: localhost:8080/api/movie/?sort=releaseYear,-ratings
+    http: if (req.query.sort) {
       const sortBy = req.query.sort.split(',').join(' ');
       query = query.sort(sortBy);
       // query.sort('releaseYear ratings');
+    } else {
+      query = query.sort('-createdAt');
     }
 
     const movie = await query;
