@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan');
 const userRoutes = require('./routes/userRoutes');
+const movieRoutes = require('./routes/movieRoutes');
 
 app.use(express.json());
 if (process.env.NODE_ENV === 'development') {
@@ -17,5 +18,6 @@ app.use((req, res, next) => {
 
 // Route Handlers
 app.use('/api/user', userRoutes);
+app.use('/api/movie', movieRoutes);
 
 module.exports = app;
