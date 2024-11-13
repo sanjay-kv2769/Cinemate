@@ -1,4 +1,5 @@
 const Movie = require('../model/movieModel');
+const ApiFeatures = require('../utils/ApiFeature');
 
 // exports.checkId = (req, res, next, value) => {
 //   let id = value * 1;
@@ -14,37 +15,53 @@ const Movie = require('../model/movieModel');
 //   next();
 // };
 
+exports.getHighestRated = async (req, res, next) => {
+  req.query.limit = '5';
+  req.query.sort = '-ratings';
+  next();
+};
+
 exports.GetAllMovies = async (req, res) => {
   try {
+    // =================Reusable Class=================
+    const features = new ApiFeatures(Movie.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+
+    let movie = await features.query;
+    // =================Reusable Class End=================
+
     // const movie = await Movie.find(req.query);
 
     // =================== Filtering =======================
-    // ------Excluding query object properties------
-    // url: localhost:8080/api/movie?duration=150&ratings=5&price=100&sort=1&page=12
+    // ------Excluding query object properties-----------------------------------------
+    // url: localhost:8080/api/movie?duration=150&ratings=5&price=100&sort=1&page=12 --xxx
     // const excludeFields = ['sort', 'page', 'limit', 'fields'];
     // const queryObj = { ...req.query };
     // excludeFields.forEach((ele) => {
     //   delete queryObj[ele];
     // });
-    // const movie = await Movie.find(queryObj);
+    // let query =  Movie.find(queryObj);
 
-    // ------filtering example------
-    // url: localhost:8080/api/movie?duration=150&ratings=5&price=100
+    // ------filtering example---------------------------------------------------------
+    // url: localhost:8080/api/movie?duration=150&ratings=5&price=100 --xxx
     // const movie = await Movie.find()
     // .where('duration')
     // .equals(req.query.duration)
     // .where('releaseYear')
     // .equals(req.query.releaseYear);
 
-    // ------Advance filtering example------
-    // url: localhost:8080/api/movie?duration[gte]=150&ratings[gte]=5&price[lte]=100
-    // ----------on code-----------
+    // ------Advance filtering example-------------------------------------------------
+    // url: localhost:8080/api/movie?duration[gte]=150&ratings[gte]=5&price[lte]=100 --xxx
+    // ----------on code----------------------------
     // const movie = await Movie.find({
     //   duration: { $gte: 150 },
     //   ratings: { $gte: 5 },
     //   price: { $lte: 100 },
     // });
-    // ----------on code-----------
+    // ----------on code----------------------------
     // const movie = await Movie.find()
     //   .where('duration')
     //   .gte(req.query.duration)
@@ -52,7 +69,7 @@ exports.GetAllMovies = async (req, res) => {
     //   .gte(req.query.ratings)
     //   .where('price')
     //   .lte(req.query.price);
-    // ---------on api query to work------------
+    // ---------on api query to work----------------
     // console.log(req.query);
     // let queryStr = JSON.stringify(req.query);
     // queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
@@ -62,24 +79,54 @@ exports.GetAllMovies = async (req, res) => {
 
     // =================== SORTING =======================
     // url: http://localhost:8080/api/movie/?sort=price
-    let query = Movie.find();
+    // let query = Movie.find();
 
     // ------sorting by price only-----
-    //url: localhost:8080/api/movie/?sort=price
+    //url: localhost:8080/api/movie/?sort=price --xxx
     // if (req.query.sort) {
     //   query = query.sort(req.query.sort);
     // }
     //------sorting by releaseYear and ratings------
-    //url: localhost:8080/api/movie/?sort=releaseYear,-ratings
-    http: if (req.query.sort) {
-      const sortBy = req.query.sort.split(',').join(' ');
-      query = query.sort(sortBy);
-      // query.sort('releaseYear ratings');
-    } else {
-      query = query.sort('-createdAt');
-    }
+    //url: localhost:8080/api/movie/?sort=releaseYear,-ratings --xxx
+    // if (req.query.sort) {
+    //   const sortBy = req.query.sort.split(',').join(' ');
+    //   query = query.sort(sortBy);
+    //   // query.sort('releaseYear ratings');
+    // } else {
+    //   query = query.sort('-createdAt');
+    // }
 
-    const movie = await query;
+    // const movie = await query;
+
+    // =================== Limiting fields (in data) =======================
+    //url: http://localhost:8080/api/movie/?fields=name,releaseYear,price,ratings--xxxxxx
+    // if (req.query.fields) {
+    //   // query.select('name duration price ratings')
+    //   const fields = req.query.fields.split(',').join(' ');
+    //   console.log(fields);
+
+    //   query = query.select(fields);
+    // }
+    // else{
+    //   query = query.select('-__v');
+
+    // }
+    // const movie = await query;
+
+    // =================== Pagination =======================
+    // const page = req.query.page * 1 || 1;
+    // const limit = req.query.limit * 1 || 10;
+    // // Page 1: 1 - 10; Page 2: 11-20; Page 3: 21 - 30;
+    // const skip = (page - 1) * limit;
+    // query = query.skip(skip).limit(limit);
+
+    // if (req.query.page) {
+    //   const moviesCount = await Movie.countDocuments();
+    //   if (skip >= moviesCount) {
+    //     throw new Error('This page is not found!');
+    //   }
+    // }
+    // const movie = await query;
 
     res.status(200).json({
       status: 'success',
