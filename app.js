@@ -19,5 +19,11 @@ app.use((req, res, next) => {
 // Route Handlers
 app.use('/api/user', userRoutes);
 app.use('/api/movie', movieRoutes);
+app.all('*', (req, res) => {
+  res.status(404).json({
+    status: 'fail',
+    message: `Can't find ${req.originalUrl} on the server!`,
+  });
+});
 
 module.exports = app;

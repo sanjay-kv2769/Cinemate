@@ -1,0 +1,16 @@
+A new movie document with name sample test 1 has been created by Sanjay
+Query took 46 milliseconds 
+Query took 245 milliseconds 
+Query took 33 milliseconds 
+Query took 69 milliseconds 
+Query took 50 milliseconds 
+A new movie document with name sample test 2 has been created by Sanjay
+A new movie document with name sample test 3 has been created by Sanjay
+Query took 100 milliseconds 
+Query took 47 milliseconds 
+Query took 55 milliseconds 
+Query took 81 milliseconds 
+Query took 944 milliseconds 
+Query took 48 milliseconds 
+Query took 53 milliseconds 
+Query took 38 milliseconds 

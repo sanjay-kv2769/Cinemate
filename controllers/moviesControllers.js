@@ -212,3 +212,73 @@ exports.DeleteMovie = async (req, res) => {
     });
   }
 };
+
+exports.MovieStats = async (req, res) => {
+  try {
+    const stats = await Movie.aggregate([
+      // { $match: { releaseDate: { $lte: new Date() } } },
+      { $match: { ratings: { $gte: 4.0 } } },
+      {
+        $group: {
+          // _id: null,
+          _id: '$releaseYear',
+          avgRating: { $avg: '$ratings' },
+          avgPrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' },
+          priceTotal: { $sum: '$price' },
+          movieCount: { $sum: 1 },
+        },
+      },
+      { $sort: { minPrice: -1 } },
+      // { $match: { maxPrice: { $gte: 10 } } },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      length: stats.length,
+      data: {
+        stats,
+      },
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: 'fail',
+      message: error.message,
+    });
+  }
+};
+
+exports.getMovieByGenre = async (req, res) => {
+  try {
+    const genre = req.params.genre;
+    const movies = await Movie.aggregate([
+      { $unwind: '$genres' },
+      {
+        $group: {
+          _id: '$genres',
+          movieCount: { $sum: 1 },
+          movies: { $push: '$name' },
+        },
+      },
+      { $addFields: { genre: '$_id' } },
+      { $project: { _id: 0 } },
+      { $sort: { movieCount: -1 } },
+      // {$limit:6},
+      { $match: { genre: genre } },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      length: movies.length,
+      data: {
+        movies,
+      },
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: 'fail',
+      message: error.message,
+    });
+  }
+};

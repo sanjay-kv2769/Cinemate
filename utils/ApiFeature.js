@@ -6,13 +6,13 @@ class ApiFeatures {
 
   filter() {
     const queryCopy = { ...this.queryStr };
-    console.log(queryCopy);
+    // console.log(queryCopy);
 
     // Removing fields from the query
     const removeFields = ['sort', 'fields', 'q', 'limit', 'page'];
     removeFields.forEach((el) => delete queryCopy[el]);
 
-    let queryString = JSON.stringify(queryCopy);
+    let queryString = JSON.stringify(queryCopy); 
     queryString = queryString.replace(
       /\b(gte|gt|lte|lt)\b/g,
       (match) => `$${match}`
