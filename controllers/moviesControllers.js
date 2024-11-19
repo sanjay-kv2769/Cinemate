@@ -1,5 +1,7 @@
 const Movie = require('../model/movieModel');
 const ApiFeatures = require('../utils/ApiFeature');
+const AsyncErrorHandler = require('../utils/AsyncErrorHandler');
+const CustomError = require('../utils/CustomError');
 
 // exports.checkId = (req, res, next, value) => {
 //   let id = value * 1;
@@ -21,264 +23,232 @@ exports.getHighestRated = async (req, res, next) => {
   next();
 };
 
-exports.GetAllMovies = async (req, res) => {
-  try {
-    // =================Reusable Class=================
-    const features = new ApiFeatures(Movie.find(), req.query)
-      .filter()
-      .sort()
-      .limitFields()
-      .paginate();
+exports.GetAllMovies = AsyncErrorHandler(async (req, res, next) => {
+  // =================Reusable Class=================
+  const features = new ApiFeatures(Movie.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
 
-    let movie = await features.query;
-    // =================Reusable Class End=================
+  let movie = await features.query;
 
-    // const movie = await Movie.find(req.query);
+  // =================Reusable Class End=================
 
-    // =================== Filtering =======================
-    // ------Excluding query object properties-----------------------------------------
-    // url: localhost:8080/api/movie?duration=150&ratings=5&price=100&sort=1&page=12 --xxx
-    // const excludeFields = ['sort', 'page', 'limit', 'fields'];
-    // const queryObj = { ...req.query };
-    // excludeFields.forEach((ele) => {
-    //   delete queryObj[ele];
-    // });
-    // let query =  Movie.find(queryObj);
+  // const movie = await Movie.find(req.query);
 
-    // ------filtering example---------------------------------------------------------
-    // url: localhost:8080/api/movie?duration=150&ratings=5&price=100 --xxx
-    // const movie = await Movie.find()
-    // .where('duration')
-    // .equals(req.query.duration)
-    // .where('releaseYear')
-    // .equals(req.query.releaseYear);
+  // =================== Filtering =======================
+  // ------Excluding query object properties-----------------------------------------
+  // url: localhost:8080/api/movie?duration=150&ratings=5&price=100&sort=1&page=12 --xxx
+  // const excludeFields = ['sort', 'page', 'limit', 'fields'];
+  // const queryObj = { ...req.query };
+  // excludeFields.forEach((ele) => {
+  //   delete queryObj[ele];
+  // });
+  // let query =  Movie.find(queryObj);
 
-    // ------Advance filtering example-------------------------------------------------
-    // url: localhost:8080/api/movie?duration[gte]=150&ratings[gte]=5&price[lte]=100 --xxx
-    // ----------on code----------------------------
-    // const movie = await Movie.find({
-    //   duration: { $gte: 150 },
-    //   ratings: { $gte: 5 },
-    //   price: { $lte: 100 },
-    // });
-    // ----------on code----------------------------
-    // const movie = await Movie.find()
-    //   .where('duration')
-    //   .gte(req.query.duration)
-    //   .where('ratings')
-    //   .gte(req.query.ratings)
-    //   .where('price')
-    //   .lte(req.query.price);
-    // ---------on api query to work----------------
-    // console.log(req.query);
-    // let queryStr = JSON.stringify(req.query);
-    // queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-    // const queryObj = JSON.parse(queryStr);
-    // console.log(queryObj);
-    // const movie = await Movie.find(queryObj);
+  // ------filtering example---------------------------------------------------------
+  // url: localhost:8080/api/movie?duration=150&ratings=5&price=100 --xxx
+  // const movie = await Movie.find()
+  // .where('duration')
+  // .equals(req.query.duration)
+  // .where('releaseYear')
+  // .equals(req.query.releaseYear);
 
-    // =================== SORTING =======================
-    // url: http://localhost:8080/api/movie/?sort=price
-    // let query = Movie.find();
+  // ------Advance filtering example-------------------------------------------------
+  // url: localhost:8080/api/movie?duration[gte]=150&ratings[gte]=5&price[lte]=100 --xxx
+  // ----------on code----------------------------
+  // const movie = await Movie.find({
+  //   duration: { $gte: 150 },
+  //   ratings: { $gte: 5 },
+  //   price: { $lte: 100 },
+  // });
+  // ----------on code----------------------------
+  // const movie = await Movie.find()
+  //   .where('duration')
+  //   .gte(req.query.duration)
+  //   .where('ratings')
+  //   .gte(req.query.ratings)
+  //   .where('price')
+  //   .lte(req.query.price);
+  // ---------on api query to work----------------
+  // console.log(req.query);
+  // let queryStr = JSON.stringify(req.query);
+  // queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+  // const queryObj = JSON.parse(queryStr);
+  // console.log(queryObj);
+  // const movie = await Movie.find(queryObj);
 
-    // ------sorting by price only-----
-    //url: localhost:8080/api/movie/?sort=price --xxx
-    // if (req.query.sort) {
-    //   query = query.sort(req.query.sort);
-    // }
-    //------sorting by releaseYear and ratings------
-    //url: localhost:8080/api/movie/?sort=releaseYear,-ratings --xxx
-    // if (req.query.sort) {
-    //   const sortBy = req.query.sort.split(',').join(' ');
-    //   query = query.sort(sortBy);
-    //   // query.sort('releaseYear ratings');
-    // } else {
-    //   query = query.sort('-createdAt');
-    // }
+  // =================== SORTING =======================
+  // url: http://localhost:8080/api/movie/?sort=price
+  // let query = Movie.find();
 
-    // const movie = await query;
+  // ------sorting by price only-----
+  //url: localhost:8080/api/movie/?sort=price --xxx
+  // if (req.query.sort) {
+  //   query = query.sort(req.query.sort);
+  // }
+  //------sorting by releaseYear and ratings------
+  //url: localhost:8080/api/movie/?sort=releaseYear,-ratings --xxx
+  // if (req.query.sort) {
+  //   const sortBy = req.query.sort.split(',').join(' ');
+  //   query = query.sort(sortBy);
+  //   // query.sort('releaseYear ratings');
+  // } else {
+  //   query = query.sort('-createdAt');
+  // }
 
-    // =================== Limiting fields (in data) =======================
-    //url: http://localhost:8080/api/movie/?fields=name,releaseYear,price,ratings--xxxxxx
-    // if (req.query.fields) {
-    //   // query.select('name duration price ratings')
-    //   const fields = req.query.fields.split(',').join(' ');
-    //   console.log(fields);
+  // const movie = await query;
 
-    //   query = query.select(fields);
-    // }
-    // else{
-    //   query = query.select('-__v');
+  // =================== Limiting fields (in data) =======================
+  //url: http://localhost:8080/api/movie/?fields=name,releaseYear,price,ratings--xxxxxx
+  // if (req.query.fields) {
+  //   // query.select('name duration price ratings')
+  //   const fields = req.query.fields.split(',').join(' ');
+  //   console.log(fields);
 
-    // }
-    // const movie = await query;
+  //   query = query.select(fields);
+  // }
+  // else{
+  //   query = query.select('-__v');
 
-    // =================== Pagination =======================
-    // const page = req.query.page * 1 || 1;
-    // const limit = req.query.limit * 1 || 10;
-    // // Page 1: 1 - 10; Page 2: 11-20; Page 3: 21 - 30;
-    // const skip = (page - 1) * limit;
-    // query = query.skip(skip).limit(limit);
+  // }
+  // const movie = await query;
 
-    // if (req.query.page) {
-    //   const moviesCount = await Movie.countDocuments();
-    //   if (skip >= moviesCount) {
-    //     throw new Error('This page is not found!');
-    //   }
-    // }
-    // const movie = await query;
+  // =================== Pagination =======================
+  // const page = req.query.page * 1 || 1;
+  // const limit = req.query.limit * 1 || 10;
+  // // Page 1: 1 - 10; Page 2: 11-20; Page 3: 21 - 30;
+  // const skip = (page - 1) * limit;
+  // query = query.skip(skip).limit(limit);
 
-    res.status(200).json({
-      status: 'success',
-      length: movie.length,
-      data: {
-        movie,
-      },
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: 'fail',
-      message: error.message,
-    });
+  // if (req.query.page) {
+  //   const moviesCount = await Movie.countDocuments();
+  //   if (skip >= moviesCount) {
+  //     throw new Error('This page is not found!');
+  //   }
+  // }
+  // const movie = await query;
+
+  res.status(200).json({
+    status: 'success',
+    length: movie.length,
+    data: {
+      movie,
+    },
+  });
+});
+
+exports.GetSingleMovies = AsyncErrorHandler(async (req, res, next) => {
+  const movie = await Movie.findById(req.params.id);
+  console.log(x);
+
+  if (!movie) {
+    const error = new CustomError('Movie with that ID is not found!', 404);
+    return next(error);
   }
-};
+  res.status(200).json({
+    status: 'success',
+    data: {
+      movie,
+    },
+  });
+});
 
-exports.GetSingleMovies = async (req, res) => {
-  try {
-    const movie = await Movie.find({ _id: req.params.id });
-    res.status(200).json({
-      status: 'success',
-      data: {
-        movie,
-      },
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: 'fail',
-      message: error.message,
-    });
+exports.AddNewMovie = AsyncErrorHandler(async (req, res, next) => {
+  // console.log(x);
+
+  const movie = await Movie.create(req.body);
+  res.status(201).json({
+    status: 'success',
+    data: {
+      movie,
+    },
+  });
+});
+
+exports.UpdateMovie = AsyncErrorHandler(async (req, res, next) => {
+  const updatedMovie = await Movie.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+  if (!updatedMovie) {
+    const error = new CustomError('Movie with that ID is not found!', 404);
+    return next(error);
   }
-};
+  res.status(200).json({
+    status: 'success',
+    data: {
+      movie: updatedMovie,
+    },
+  });
+});
 
-exports.AddNewMovie = async (req, res) => {
-  try {
-    const movie = await Movie.create(req.body);
-    res.status(201).json({
-      status: 'success',
-      data: {
-        movie,
-      },
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: 'fail',
-      message: error.message,
-    });
+exports.DeleteMovie = AsyncErrorHandler(async (req, res, next) => {
+  const deletedMovie = await Movie.findByIdAndDelete(req.params.id);
+  if (!deletedMovie) {
+    const error = new CustomError('Movie with that ID is not found!', 404);
+    return next(error);
   }
-};
 
-exports.UpdateMovie = async (req, res) => {
-  try {
-    const updatedMovie = await Movie.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-    res.status(200).json({
-      status: 'success',
-      data: {
-        movie: updatedMovie,
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
+
+exports.MovieStats = AsyncErrorHandler(async (req, res, next) => {
+  const stats = await Movie.aggregate([
+    // { $match: { releaseDate: { $lte: new Date() } } },
+    { $match: { ratings: { $gte: 4.0 } } },
+    {
+      $group: {
+        // _id: null,
+        _id: '$releaseYear',
+        avgRating: { $avg: '$ratings' },
+        avgPrice: { $avg: '$price' },
+        minPrice: { $min: '$price' },
+        maxPrice: { $max: '$price' },
+        priceTotal: { $sum: '$price' },
+        movieCount: { $sum: 1 },
       },
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: 'fail',
-      message: error.message,
-    });
-  }
-};
+    },
+    { $sort: { minPrice: -1 } },
+    // { $match: { maxPrice: { $gte: 10 } } },
+  ]);
 
-exports.DeleteMovie = async (req, res) => {
-  try {
-    await Movie.findByIdAndDelete(req.params.id);
-    res.status(204).json({
-      status: 'success',
-      data: null,
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: 'fail',
-      message: error.message,
-    });
-  }
-};
+  res.status(200).json({
+    status: 'success',
+    length: stats.length,
+    data: {
+      stats,
+    },
+  });
+});
 
-exports.MovieStats = async (req, res) => {
-  try {
-    const stats = await Movie.aggregate([
-      // { $match: { releaseDate: { $lte: new Date() } } },
-      { $match: { ratings: { $gte: 4.0 } } },
-      {
-        $group: {
-          // _id: null,
-          _id: '$releaseYear',
-          avgRating: { $avg: '$ratings' },
-          avgPrice: { $avg: '$price' },
-          minPrice: { $min: '$price' },
-          maxPrice: { $max: '$price' },
-          priceTotal: { $sum: '$price' },
-          movieCount: { $sum: 1 },
-        },
+exports.getMovieByGenre = AsyncErrorHandler(async (req, res, next) => {
+  const genre = req.params.genre;
+  const movies = await Movie.aggregate([
+    { $unwind: '$genres' },
+    {
+      $group: {
+        _id: '$genres',
+        movieCount: { $sum: 1 },
+        movies: { $push: '$name' },
       },
-      { $sort: { minPrice: -1 } },
-      // { $match: { maxPrice: { $gte: 10 } } },
-    ]);
+    },
+    { $addFields: { genre: '$_id' } },
+    { $project: { _id: 0 } },
+    { $sort: { movieCount: -1 } },
+    // {$limit:6},
+    { $match: { genre: genre } },
+  ]);
 
-    res.status(200).json({
-      status: 'success',
-      length: stats.length,
-      data: {
-        stats,
-      },
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: 'fail',
-      message: error.message,
-    });
-  }
-};
-
-exports.getMovieByGenre = async (req, res) => {
-  try {
-    const genre = req.params.genre;
-    const movies = await Movie.aggregate([
-      { $unwind: '$genres' },
-      {
-        $group: {
-          _id: '$genres',
-          movieCount: { $sum: 1 },
-          movies: { $push: '$name' },
-        },
-      },
-      { $addFields: { genre: '$_id' } },
-      { $project: { _id: 0 } },
-      { $sort: { movieCount: -1 } },
-      // {$limit:6},
-      { $match: { genre: genre } },
-    ]);
-
-    res.status(200).json({
-      status: 'success',
-      length: movies.length,
-      data: {
-        movies,
-      },
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: 'fail',
-      message: error.message,
-    });
-  }
-};
+  res.status(200).json({
+    status: 'success',
+    length: movies.length,
+    data: {
+      movies,
+    },
+  });
+});
