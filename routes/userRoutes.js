@@ -10,6 +10,8 @@ const {
   checkId,
   validateBody,
 } = require('../controllers/userControllers');
+
+
 const userRoutes = express.Router();
 
 userRoutes.param('id', checkId);

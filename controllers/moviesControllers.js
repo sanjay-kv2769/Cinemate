@@ -141,7 +141,7 @@ exports.GetAllMovies = AsyncErrorHandler(async (req, res, next) => {
 
 exports.GetSingleMovies = AsyncErrorHandler(async (req, res, next) => {
   const movie = await Movie.findById(req.params.id);
-  console.log(x);
+  // console.log(x);
 
   if (!movie) {
     const error = new CustomError('Movie with that ID is not found!', 404);
