@@ -7,7 +7,6 @@ const sanitize = require('express-mongo-sanitize');
 const xssCleanMiddleware = require('./utils/xssSanitization');
 const hpp = require('hpp');
 
-const userRoutes = require('./routes/userRoutes');
 const movieRoutes = require('./routes/movieRoutes');
 const authRoutes = require('./routes/authRoutes');
 const CustomError = require('./utils/CustomError');
@@ -62,8 +61,12 @@ app.use((req, res, next) => {
 // Route Handlers
 app.use('/api/movie', movieRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/user', userRoutes);
 app.use('/api/userProfile', userProfileRoutes);
+
+app.get('/', (req, res, next) => {
+  res.end('Server is working fine');
+});
+
 app.all('*', (req, res, next) => {
   // res.status(404).json({
   //   status: 'fail',
